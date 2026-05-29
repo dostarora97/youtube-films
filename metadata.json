@@ -1,0 +1,6 @@
+{
+  "name": "YouTube Playlist Viewer",
+  "description": "View all your YouTube playlists and their items.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
