@@ -6,6 +6,9 @@ import { fetchPlaylistItems, fetchPlaylists, fetchPlaylistById, parseMediaTitle,
 import { YouTubePlaylist, YouTubePlaylistItem } from './types';
 import { LogOut, MonitorPlay, ArrowLeft, PlaySquare, ListVideo, Terminal, ChevronUp, ChevronDown, Copy, Trash2, ArrowRight, Sparkles, Film, ExternalLink, Menu, X, Search, Plus, UserCircle, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { BrowserRouter as Router, useNavigate, useLocation } from 'react-router-dom';
+
+import { Chat } from './components/Chat';
 
 export interface ErrorLog {
   id: string;
@@ -162,7 +165,9 @@ function PlaylistItemRow({ item, playlistId, logError }: { key?: React.Key; item
   );
 }
 
-export default function App() {
+function InnerApp() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [needsAuth, setNeedsAuth] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
@@ -505,10 +510,10 @@ export default function App() {
         className={`fixed inset-y-0 left-0 z-40 shrink-0 w-80 bg-gray-900 border-r border-gray-800 flex flex-col transition-all duration-300 lg:static lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 lg:ml-0' : '-translate-x-full lg:-ml-80'}`}
       >
         {/* Sidebar Header & Fixed Forms */}
-        <div className="p-4 border-b border-gray-800 sticky top-0 bg-gray-900 z-10 flex items-center gap-2">
+        <div className="shrink-0 border-b border-gray-800 sticky top-0 bg-gray-900 z-10 px-4 py-3.5 flex items-center gap-3">
           <button 
             onClick={() => setIsSidebarOpen(prev => !prev)} 
-            className="p-1 -ml-1 text-gray-500 hover:text-gray-100 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 transition-colors shrink-0"
+            className="p-1.5 -ml-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 transition-colors shrink-0"
             aria-label="Toggle Sidebar"
           >
              <Menu className="w-5 h-5" />
@@ -520,7 +525,7 @@ export default function App() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-gray-800 border border-gray-800 rounded-md text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-gray-900"
+              className="w-full pl-9 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-colors"
               aria-label="Search playlists"
             />
           </div>
@@ -612,10 +617,20 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#0f0f0f] relative">
+      <main className="flex-1 flex flex-col min-w-0 min-h-0 bg-[#0f0f0f] relative">
         {/* Main Content Header */}
-        <header className="bg-gray-900 border-b border-gray-800 h-16 shrink-0 z-10 px-4 flex items-center justify-between gap-4">
-          {isMobileSearchExpanded ? (
+        <header className="bg-gray-900 border-b border-gray-800 shrink-0 z-10 px-4 py-3.5 flex items-center justify-between gap-4">
+          {location.pathname === '/chat' ? (
+            <div className="flex items-center gap-2 w-full">
+               <button 
+                 onClick={() => navigate(-1)}
+                 className="p-2 -ml-2 text-gray-500 hover:text-gray-100 hover:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 transition-colors shrink-0"
+                 aria-label="Back"
+               >
+                 <ArrowLeft className="w-5 h-5" />
+               </button>
+            </div>
+          ) : isMobileSearchExpanded ? (
             <div className="flex items-center gap-2 w-full">
                <button 
                  onClick={() => setIsMobileSearchExpanded(false)}
@@ -631,11 +646,12 @@ export default function App() {
                    type="text"
                    value={itemSearchQuery}
                    onChange={(e) => setItemSearchQuery(e.target.value)}
-                   className="w-full pl-9 pr-3 py-1.5 bg-gray-800 border border-gray-800 rounded-md text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-gray-900 transition-colors"
+                   className="w-full pl-9 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-colors"
                    aria-label="Search videos in playlist"
                  />
                </div>
                <button
+                 onClick={() => navigate('/chat')}
                  className="p-2 -mr-2 text-indigo-400 hover:text-indigo-300 hover:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 transition-colors shrink-0"
                  aria-label="AI Features"
                >
@@ -696,10 +712,18 @@ export default function App() {
                          type="text"
                          value={itemSearchQuery}
                          onChange={(e) => setItemSearchQuery(e.target.value)}
-                         className="w-full pl-9 pr-3 py-1.5 bg-gray-800 border border-gray-800 rounded-md text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-gray-900 transition-colors"
+                         className="w-full pl-9 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-colors"
                          aria-label="Search videos in playlist"
                       />
                    </div>
+                   
+                   <button
+                     onClick={() => navigate('/chat')}
+                     className="p-2 -mr-2 sm:mr-0 text-indigo-400 hover:text-indigo-300 hover:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 transition-colors shrink-0 ml-1 sm:ml-2"
+                     aria-label="AI Features"
+                   >
+                     <Sparkles className="w-5 h-5" />
+                   </button>
                  </>
               )}
             </>
@@ -707,7 +731,26 @@ export default function App() {
         </header>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 flex flex-col">
+        {location.pathname === '/chat' ? (
+          <div className="flex-1 flex flex-col relative min-h-0">
+            <Chat 
+              selectedPlaylist={selectedPlaylist} 
+              initialItems={playlistItems} 
+              initialNextPageToken={nextPageToken} 
+              onContextLoaded={(items, token) => {
+                setPlaylistItems(items);
+                setNextPageToken(token);
+                if (selectedPlaylist) {
+                  playlistCacheRef.current[selectedPlaylist.id] = {
+                    items,
+                    nextPageToken: token
+                  };
+                }
+              }}
+            />
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 flex flex-col min-h-0">
           <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
              {!selectedPlaylist ? (
                 <div className="flex-1 flex items-center justify-center">
@@ -753,9 +796,18 @@ export default function App() {
              )}
           </div>
         </div>
+        )}
 
         <ErrorConsole logs={errorLogs} setLogs={setErrorLogs} />
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <InnerApp />
+    </Router>
   );
 }
