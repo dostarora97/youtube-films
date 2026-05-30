@@ -168,6 +168,7 @@ export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 1024 : false);
 
   const [playlists, setPlaylists] = useState<YouTubePlaylist[]>([]);
@@ -332,6 +333,7 @@ export default function App() {
 
   const handleLogin = async () => {
     setIsLoggingIn(true);
+    setAuthError(null);
     try {
       const result = await googleSignIn();
       if (result) {
@@ -340,7 +342,12 @@ export default function App() {
         setNeedsAuth(false);
       }
     } catch (err: any) {
-      logError('Could not sign you in. Please try again.', err);
+      const isMissingState = err?.message?.toLowerCase().includes('missing initial state');
+      if (isMissingState && window.self !== window.top) {
+        setAuthError('Authentication is blocked in this preview by your browser\'s storage settings. Please open the app in a new tab.');
+      } else {
+        logError('Could not sign you in. Please try again.', err);
+      }
     } finally {
       setIsLoggingIn(false);
     }
@@ -460,11 +467,24 @@ export default function App() {
   if (needsAuth) {
     return (
       <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-gray-900 flex flex-col items-center text-center space-y-6">
-          <div className="w-12 h-12 flex items-center justify-center text-gray-100 border border-gray-800 rounded-xl">
+        <div className="max-w-md w-full flex flex-col items-center text-center space-y-6">
+          <div className="w-12 h-12 flex items-center justify-center text-gray-100 border border-gray-800 rounded-xl bg-gray-800/50">
             <MonitorPlay className="w-6 h-6" />
           </div>
           <LoginButton onClick={handleLogin} isLoading={isLoggingIn} />
+          
+          {authError && (
+            <div className="text-sm text-red-400 w-full mt-6 p-4 bg-red-900/10 border border-red-900/30 rounded-lg flex flex-col items-center gap-4 text-center">
+              <p>{authError}</p>
+              <button 
+                onClick={() => window.open(window.location.href, '_blank')}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-800 text-gray-200 rounded-md hover:bg-gray-700 transition-colors border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600"
+              >
+                <span>Open in New Tab</span>
+                <ExternalLink className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
         <ErrorConsole logs={errorLogs} setLogs={setErrorLogs} />
       </div>
